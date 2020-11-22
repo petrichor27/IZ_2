@@ -1,0 +1,51 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+void funp(int* slovo,  int& num, int n, int k, int i, ofstream& fout)
+{
+	int N = 10; //длина алфавита
+	if (i == n)
+	{
+		char* alfavit = new char[N] {'a', 'b', 'c', 'd' , 'e', 'f', 'g', 'h', 'j', 'k'};
+		int kolvo_bukv = 0;
+		int* used = new int[N];
+		for (int j = 0; j < N; j++)
+			used[j] = 0;
+		for (int j = 0; j < n; j++)
+		{
+			if (used[slovo[j]] == 0)
+				kolvo_bukv++;
+			used[slovo[j]] = 1;
+		}
+	 	if (kolvo_bukv == k)
+		{
+			fout << num << ") ";
+			for (int l = 0; l < n; l++)
+			{
+				fout << alfavit[slovo[l]];
+			}
+			num++;
+			fout << endl;
+		}
+	}
+	else
+		for (int j = 0; j < N; j++)
+		{
+			{
+				slovo[i] = j;
+				funp(slovo, num, n, k, i + 1, fout);
+			}
+		}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "RUS");
+	int k, n;
+	ofstream fout("OUTPUT.txt");
+	n = 15; k = 7;
+	int* slovo = new int[n];
+	int i = 0, num = 1; 
+	funp(slovo, num, n, k, i, fout);
+	fout.close();
+}
