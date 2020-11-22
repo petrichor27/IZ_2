@@ -1,0 +1,63 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+void funp(int* slovo, int& num, int n, int k, int m, int i, ofstream& fout)
+{
+	int N = 10; //длина алфавита
+	if (i == n)
+	{
+		int* povt = new int[N];
+		char* alfavit = new char[N] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j','k'};
+		for (int j = 0; j < N; j++)
+			povt[j] = 0;
+		for (int l = 0; l < n; l++)
+			povt[slovo[l]]++;
+		int kolvo_k = 0, kolvo_m = 0;
+
+		for (int j = 0; j < N; j++)
+		{
+			if (povt[j] == m) kolvo_m++;
+			else if (povt[j] == k) kolvo_k++;
+			else if (povt[j] > 1 && !(povt[j] == k || povt[j] == m)) kolvo_k = 2;
+		}
+		if (kolvo_m == 1 && kolvo_k == 1)
+		{
+			fout << num << ") ";
+			for (int l = 0; l < n; l++)
+			{
+				fout << alfavit[slovo[l]];
+			}
+			num++;
+			fout << endl;
+		}
+	}
+	else
+		for (int j = 0; j < N; j++)
+		{
+			slovo[i] = j;
+			funp(slovo, num, n,  k, m, i + 1, fout);
+		}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "RUS");
+	int k, m, n;
+	ofstream fout("OUTPUT.txt");
+	cout<< "Введите длину слова n:   ";
+	cin >> n;
+	cout << "Введите k:   ";
+	cin >> k;
+	cout << "Введите m:   ";
+	cin >> m;
+	if (!(m + k <= n && k + m + 8 >= n && k != m))
+		cout << "Введены некоррентные данные. Введите еще раз\n";
+	else 
+	{
+		fout << "n = " << n << ", k = " << k << ", m = " << m << endl;
+		int* slovo = new int[n];
+		int i = 0, num = 1;
+		funp(slovo, num, n, k, m, i, fout);
+	}
+	fout.close();
+}
