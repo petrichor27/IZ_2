@@ -1,0 +1,59 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+void Swap(int* a, int i, int j)
+{
+    int temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+bool Perestanovka(int* a, int n)
+{
+    int i = n - 2;
+    while (i != -1 && a[i] >= a[i + 1]) // если правый элемент <= левого. Если условие нарушится, левый элемент станет текущим
+        i--;
+    if (i == -1) // все элементы теперь в порядке убывания
+        return false; 
+    int j = n - 1;
+    while (a[i] >= a[j]) 
+        j--;
+    Swap(a, i, j);
+    int l = i + 1, r = n - 1; // сортируем в порядке возрастания часть последовательности, которая справа от текущего
+    while (l < r)
+    {
+        Swap(a, l, r);
+        l++;
+        r--;
+    }
+    return true;
+}
+void Print(int* a, int n, ofstream& fout)
+{
+    static int num = 1;
+    char* letters = new char[n]{ 'П', 'Е', 'Р','Е', 'С', 'Т', 'А', 'Н', 'О', 'В', 'К' , 'А' };
+    // cout << num << ") ";
+    fout << num++ << ") ";
+    for (int i = 0; i < n; i++)
+    {
+        fout << letters[a[i]];
+        // cout << a1[a[i]] <<" ";
+    }
+    fout << endl;
+    //cout << endl;
+}
+int main()
+{
+    setlocale(LC_ALL, "RUS");
+    ofstream fout("OUTPUT.txt");
+    int n = 12;
+    int *a = new int[n];
+    for (int i = 0; i < n; i++)
+        a[i] = i;
+    a[3] = 1;
+    a[n - 1] = 6;
+    Print(a, n, fout);
+    while (Perestanovka(a, n))
+        Print(a, n, fout);
+    fout.close();
+    return 0;
+}
