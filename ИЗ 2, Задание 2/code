@@ -1,30 +1,30 @@
 #include <iostream>
 #include <fstream>
+#include<ctime>
 using namespace std;
-void funp(int* slovo, int& num, int n, int k, int i, ofstream& fout)
+void funp(int razmeshenie[], int n, int i, int& num, int k, ofstream& fout)
 {
 	int N = 10;//длина алфавита
 	if (i == n)
 	{
-		int* povt = new int[N];
-		char* alfavit = new char[N] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k'};
+		int* povt = new int[N];//количество повторений
 		for (int j = 0; j < N; j++)
 			povt[j] = 0;
 		for (int l = 0; l < n; l++)
-			povt[slovo[l]]++;
-		int kolvo_k = 0;
+			povt[razmeshenie[l]]++;
+		int kolvo_k = 0, flag = 0, kolvo_1 = 0, kolvo_do_k = 0;
 		for (int j = 0; j < N; j++)
+			if (povt[j] > k) { flag = 1; break; }
+			else
+				if (povt[j] == k && k != 1) kolvo_k++;
+				else if (povt[j] == 1) kolvo_1++;
+				else if (povt[j] > 1 && povt[j] < k) kolvo_do_k++;
+		if ((k != 1 && flag == 0 && (kolvo_k + kolvo_do_k == 2 || kolvo_k + kolvo_do_k == 1 && kolvo_1 > 0 || kolvo_k + kolvo_do_k == 0 && kolvo_1 == n)) || (k == 1 && kolvo_1 == n))
 		{
-				if (povt[j] <= k && povt[j]>0) kolvo_k++;
-				else if (povt[j] >= k) kolvo_k = -5;
-		}
-		if ( kolvo_k >= 2)
-		{
-			fout << num << ") ";
+			char* alfavit = new char[N] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k'};
+			fout << num + 1 << ") ";
 			for (int l = 0; l < n; l++)
-			{
-				fout << alfavit[slovo[l]];
-			}
+				fout << alfavit[razmeshenie[l]];
 			num++;
 			fout << endl;
 		}
@@ -32,28 +32,27 @@ void funp(int* slovo, int& num, int n, int k, int i, ofstream& fout)
 	else
 		for (int j = 0; j < N; j++)
 		{
-			slovo[i] = j;
-			funp(slovo, num, n, k, i + 1, fout);
+			razmeshenie[i] = j;
+			funp(razmeshenie, n, i + 1, num, k, fout);
 		}
 }
-
 int main()
 {
 	setlocale(LC_ALL, "RUS");
-	int k,  n;
-	ofstream fout("OUTPUT.txt");
+	ofstream fout("OUTPUT.res");
+	int k, n;
 	cout << "Введите длину слова n:   ";
 	cin >> n;
-	cout << "Введите k:   ";
+	cout << "Введите количество повторов:   ";
 	cin >> k;
-	if (!(k < n && 2*k + 8 >= n))
-		cout << "Введены некоррентные данные. Введите еще раз\n";
-	else
+	int* razmeshenie = new int[n];//размещение с повторением
+	int i = 0, num = 0;
+	if (k < n && 2 * k + 8 >= n)
 	{
-		fout << "n = " << n << ", k = " << k;
-		int* slovo = new int[n];
-		int i = 0, num = 1;
-		funp(slovo, num, n, k, i, fout);
+		funp(razmeshenie, n, i, num, k, fout);
+		cout << "В файл было записано " << num << " слов\n";
 	}
+	else
+		cout << "Ошибка\n";
 	fout.close();
 }
