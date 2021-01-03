@@ -1,0 +1,169 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+namespace P_Bloki
+{
+    public class Vertexes
+    {
+        public bool use { get; set; }
+        public int time_in { get; set; }//время захода поиска в глубину в вершину
+        public int time_min { get; set; }//минимум из 1) time_in текущей,
+        //2) time_in в каждый конец ребра с текущей вершиной, 
+        //3) time_min для каждого сына текущей в дереве поиска
+    }
+    public class Edge
+    {
+        public int first { get; set; }
+        public int second { get; set; }
+    }
+    public class Graf
+    {
+        private int timer = 0;
+        private int flag = 0;
+        public void DFS(int v, int t, List<Vertexes> list, int[][] rebra)
+        {
+            list[v].use = true;
+            list[v].time_in = list[v].time_min = timer;
+            timer++;
+            int children = 0;
+
+            for (int i = 0; i < rebra[v].Length; ++i)
+            {
+                int to = rebra[v][i];
+                if (to == t) continue;
+                if (list[to].use)
+                    list[v].time_min = Math.Min(list[v].time_min, list[to].time_in);
+                else
+                {
+                    DFS(to, v, list, rebra);
+                    list[v].time_min = Math.Min(list[v].time_min, list[to].time_min);
+                    if (list[to].time_min >= list[v].time_in && t != -1)
+                    flag = 1; 
+                    children++;
+                }
+            }
+
+            if (t == -1 && children > 1)
+            flag = 1;
+
+        }
+        public bool Sochlenenie(int[][] rebra)
+        {
+            List<Vertexes> list = new List<Vertexes>();
+            for (int i = 0; i < p; i++)
+                list.Add(new Vertexes { use = false, time_in = 0, time_min = 0 });
+            for (int i = 0; i < p; i++)
+                if (list[i].use == false && flag == 0)
+                {
+                    DFS(i, -1, list, rebra);
+                }
+            if (flag == 1) return true;
+            else return false;
+        }
+        public bool Sochet(int[] res, int n, int k)
+        {
+            for (int i = k - 1; i >= 0; i--)
+                if (res[i] < n - k + i)
+                {
+                    res[i]++;
+                    for (int j = i + 1; j < k; j++)
+                        res[j] = res[j - 1] + 1;
+                    return true;
+                }
+            return false;
+        }
+        public void Matr(int n)
+        {
+            p = n;
+            StreamWriter fout = new StreamWriter("OUTPUT.res");
+
+            int q = p * (p - 1) / 2;
+            int[] Creb = new int[p];//массив для сочетания
+            for (int i = 0; i < p; i++)
+                Creb[i] = i;
+            List<Edge> reb = new List<Edge>();//матрица для ребер
+            if (p >= 2)
+            {
+                int kol_reb = 0;
+                do
+                {
+                    reb.Add (new Edge { first = Creb[0], second = Creb[1] });
+                    kol_reb++;
+                } while (Sochet(Creb, p, 2));
+            }
+            int[] Cver = new int[q];//тоже для сочетания
+            bool[,] ms = new bool[p, p];//матрица смежности
+
+            int num = 0;
+            for (int t = 0; t <= q; t++)
+            {
+                for (int i = 0; i < q; i++)
+                    Cver[i] = i;
+                if (q >= t)
+                {
+                    do
+                    {
+                        for (int i = 0; i < p; i++)
+                            for (int j = 0; j < p; j++)
+                                ms[i, j] = false;
+
+                        for (int i = 0; i < t; i++)
+                        {
+                            ms[reb[Cver[i]].first, reb[Cver[i]].second] = true;
+                            ms[reb[Cver[i]].second, reb[Cver[i]].first] = true;
+                        }
+                        int[][] rebra = new int[p][];//список вершин, которые соединены с i-й
+                        flag = 0;
+                        for (int i = 0; i < p; i++)
+                        {
+                            int kolvo = 0;
+                            for (int j = 0; j < p; j++)
+                                if (ms[i, j] == true)
+                                    kolvo++;
+                            rebra[i] = new int[kolvo];
+                            int y = 0;
+                            for (int j = 0; j < p; j++)
+                                if (ms[i, j] == true)
+                                {
+                                    rebra[i][y] = j;
+                                    y++;
+                                }
+                        }
+                        if (!Sochlenenie(rebra))
+                        {
+                            fout.WriteLine((num + 1));
+                            for (int i = 0; i < p; i++)
+                            {
+                                for (int j = 0; j < p; j++)
+                                    if (ms[i, j])
+                                        fout.Write(1 + " ");
+                                    else fout.Write(0 + " ");
+                                fout.WriteLine();
+                            }
+                            num++;
+                            fout.WriteLine();
+                        }
+                    } while (Sochet(Cver, q, t));
+                }
+            }               
+            Console.WriteLine("Было построено " + num + " матриц смежности.");
+
+            fout.Close();
+        }
+        private int p;
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Graf g = new Graf();
+            Console.Write("Введите p:   ");
+            int p = Convert.ToInt32(Console.ReadLine());
+            g.Matr(p);
+            Console.ReadKey();
+        }
+    }
+}
